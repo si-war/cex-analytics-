@@ -7,8 +7,14 @@ using statistical tests, clustering, and ensemble models.
 ## Repository Structure
 
 ```text
+## Repository Structure
+
+```text
 .
 ├── CEX_Analytics_final.ipynb        ← Final CEX analysis notebook
+├── app/
+│   ├── app.py                        ← Streamlit web application
+│   └── preprocessing.py              ← Data preprocessing & prediction logic
 ├── dataset used/
 │   ├── fmli/
 │   │   ├── fmli232.csv
@@ -26,7 +32,6 @@ using statistical tests, clustering, and ensemble models.
 │       ├── memi224.csv
 │       └── memi231.csv
 └── README.md
-```
 
 ## Prerequisites
 
