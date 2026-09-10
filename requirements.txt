@@ -1,0 +1,14 @@
+jupyter
+ipykernel
+joblib
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+scipy
+statsmodels
+openpyxl
+xlrd
+streamlit
+pyarrow

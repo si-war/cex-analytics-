@@ -1,175 +1,182 @@
-# CEX Analytics — Education, Income & Household Spending
+# 📊 CEXInsight — Education, Income & Household Spending (CE-PUMD)
 
-Machine learning project analyzing the **Consumer Expenditure Survey (CE-PUMD)** data.
-Explores how education, demographics, and spending patterns relate to household income,
-using statistical tests, clustering, and ensemble models.
+A complete machine-learning project on the **U.S. Consumer Expenditure Survey (CE)**, made of two
+parts that share the same data:
 
-## Repository Structure
+1. **The Jupyter notebook** (`CEX_Analytics_corrige.ipynb`) — the full research: data cleaning,
+   feature engineering, model comparison, statistical tests, and the education→income study.
+2. **The Streamlit app** (`app/`) — the same analysis, presented interactively, with a
+   ready-to-use pre-trained model.
 
-```text
-## Repository Structure
+This guide is written for a laptop with **only VS Code installed** — every step is explained.
 
-```text
-.
-├── CEX_Analytics_final.ipynb        ← Final CEX analysis notebook
-├── app/
-│   ├── app.py                        ← Streamlit web application
-│   └── preprocessing.py              ← Data preprocessing & prediction logic
-├── dataset used/
-│   ├── fmli/
-│   │   ├── fmli232.csv
-│   │   ├── fmli233.csv
-│   │   ├── fmli234.csv
-│   │   ├── fmli241.csv
-│   │   ├── fmli241x.csv
-│   │   ├── fmli242.csv
-│   │   ├── fmli243.csv
-│   │   ├── fmli244.csv
-│   │   └── fmli251.csv
-│   └── memi/
-│       ├── memi222.csv
-│       ├── memi223.csv
-│       ├── memi224.csv
-│       └── memi231.csv
-└── README.md
+---
 
-## Prerequisites
+## 1. What is inside the folder
 
-- Python 3.11+
-- [VS Code](https://code.visualstudio.com/) with the **Python** and **Jupyter** extensions
-  (install: `code --install-extension ms-python.python`, `code --install-extension ms-toolsai.jupyter`)
-- CE-PUMD data files (see [Dataset](#dataset) below)
+| Item | What it is |
+|------|-----------|
+| `CEX_Analytics_corrige.ipynb` | The notebook to run (Sprints 1 → 3) |
+| `app/` | The Streamlit dashboard (Python source files) |
+| `output/` | Pre-computed results: **`features_v1.csv`** + **`honest_gb.joblib`** (trained model) |
+| `dataset used/` | The raw survey data, two subfolders: `fmli/` and `memi/` |
+| `requirements.txt` | List of Python packages to install |
+| `README.md` | This guide |
 
-## Setup
+> ⚠️ **Keep the folder structure intact.** The app reads `output/features_v1.csv` and
+> `output/honest_gb.joblib` automatically. Do not move `output/` or `app/` out of the project folder.
+
+---
+
+## 2. On your laptop — install the tools (once)
+
+### 2.1 Install Python (3.10 or 3.11)
+
+1. Go to <https://www.python.org/downloads/> and download the latest **3.11** installer
+   (e.g. `python-3.11.x-amd64.exe`).
+2. Run it. **Important: tick the box “Add python.exe to PATH”** at the bottom of the first
+   screen, then click *Install Now*.
+
+To verify, open a **new** terminal and type:
 
 ```bash
-# 1. Clone the repository
-git clone <your-repo-url>
-cd <repo-folder>
+python --version
+```
 
-# 2. Install dependencies
+You should see something like `Python 3.11.9`. If the message is `'python' is not recognized…`,
+Python was not added to the PATH (see [Troubleshooting](#7-troubleshooting)).
+
+### 2.2 Install VS Code extensions
+
+Open VS Code, open the **Extensions** panel (icon with 4 squares on the left, or `Ctrl+Shift+X`)
+and install these two:
+
+- **Python** (from Microsoft) — `ms-python.python`
+- **Jupyter** (from Microsoft) — `ms-toolsai.jupyter`
+
+### 2.3 Open the project in VS Code
+
+1. In VS Code: **File → Open Folder…** and select the project folder.
+2. Open the terminal: **Terminal → New Terminal** (`Ctrl+Shift+ò` / `` Ctrl+` ``).
+   From now on, **run every command in this terminal**.
+
+---
+
+## 3. One-time setup — install the Python packages
+
+In the VS Code terminal (the terminal starts in the project folder automatically):
+
+```bash
 pip install -r requirements.txt
-
-# 3. Register the Jupyter kernel for VS Code
-python -m ipykernel install --user --name python311
 ```
 
-## Dataset
+This installs everything: pandas, numpy, matplotlib, seaborn, scikit-learn, scipy,
+statsmodels, jupyter, and streamlit. It downloads a few hundred MB the first time — be patient.
 
-This project uses the **CE-PUMD Interview Survey** microdata from the U.S. Bureau of Labor Statistics.
+> If you get a “permission denied” error, instead run:
+> `python -m pip install --user -r requirements.txt`
 
-You need **10 CSV files** (5 fmli + 5 memi) covering quarters 2024Q1 through 2025Q1:
+When it finishes, move on to Part A.
 
-| File | What it contains |
-|------|-----------------|
-| `fmli241x.csv` | Family characteristics & income — 2024 Q1 |
-| `fmli242.csv` | Family characteristics & income — 2024 Q2 |
-| `fmli243.csv` | Family characteristics & income — 2024 Q3 |
-| `fmli244.csv` | Family characteristics & income — 2024 Q4 |
-| `fmli251.csv` | Family characteristics & income — 2025 Q1 |
-| `memi241x.csv` | Member education — 2024 Q1 |
-| `memi242.csv` | Member education — 2024 Q2 |
-| `memi243.csv` | Member education — 2024 Q3 |
-| `memi244.csv` | Member education — 2024 Q4 |
-| `memi251.csv` | Member education — 2025 Q1 |
+---
 
-Download from the [BLS CE-PUMD website](https://www.bls.gov/cex/pumd_data.htm).
-Place all files in a single folder on your machine.
+## 4. Part A — Run the notebook
 
-## Running the Notebook
+1. In VS Code, open `CEX_Analytics_corrige.ipynb` (click the file in the Explorer).
+2. Top-right of the notebook, click the **kernel selector** and choose:
+   `Python 3.11 …` (the interpreter you installed).
+   If asked, click **“Select Kernel” → “Python Environments”** and pick it.
+3. Click **“Run All”** (the `▶▶` button at the top of the notebook) — or run cells one by one
+   with `Shift+Enter`.
 
-```bash
-code CEX_Analytics_corrige.ipynb
-```
+### The two prompts you MUST answer
 
-1. Select the `python311` kernel (top-right of the notebook).
-2. Run cells **top to bottom**.
-3. **When prompted**, paste the **full path** to the folder containing your `fmli*.csv` and `memi*.csv` files.
+The notebook stops twice and asks you to paste a folder path (`input()` box below the cell).
+**Both times, paste the full path of the `dataset used` folder** — the one that contains the
+`fmli` and `memi` subfolders.
 
-Example prompt and expected input:
+First prompt (Sprint 1, finds the `fmli*.csv` files):
 
 ```
-Paste your dataset folder path: C:\Users\you\Desktop\CEX_data\data needed
+Paste your dataset folder path:  C:\Users\<YourName>\Desktop\stage esprit-4ds\dataset used
 ```
 
-The notebook will:
-- Auto-install any missing Python packages on the first run
-- Load and merge 5 quarters of fmli and memi data
-- Engineer features, train models, run statistical tests
-- Save outputs to the `output/` folder (features_v1.csv, final_model.joblib, etc.)
+Second prompt (Sprint 3, finds the `memi*.csv` files — paste the **same** path again):
 
-> **Important:** You will be asked for the dataset path **twice** — once for the fmli files (Sprint 1)
-> and once for the memi files (Sprint 3). Paste the same folder path both times.
-
-## Running the Streamlit App
-
-After running the notebook (which generates the `output/` files):
-
-```bash
-streamlit run app/app.py
+```
+Paste your dataset folder path:  C:\Users\<YourName>\Desktop\stage esprit-4ds\dataset used
 ```
 
-Or from VS Code, run in the terminal:
+> On Windows you can copy the path from the Explorer address bar. No quotes needed.
+
+The notebook then runs the whole pipeline and saves its results into the `output/` folder.
+
+---
+
+## 5. Part B — Run the Streamlit app
+
+From the same VS Code terminal, run:
 
 ```bash
 python -m streamlit run app/app.py
 ```
 
-The app opens at **http://localhost:8501** with three pages:
+After a few seconds a browser window opens at **http://localhost:8501** with the app.
+Keep the terminal window open while you use it (closing it stops the app).
 
-### 1. Prediction
-Enter household demographics and spending → get a predicted monthly income with a
-breakdown of which features push the prediction above or below the population median.
+> If the browser does not open automatically, open that address manually in Chrome/Edge.
 
-### 2. Analysis
-Four interactive tabs:
-- **Education-Income Gap** — Boxplot + gender interaction test (ANOVA + OLS)
-- **Feature Importance** — Permutation importance from the Gradient Boosting model
-- **Clustering** — 2D KMeans on education × income, revealing natural population tiers
-- **Spending Profiles** — Budget shares by education level (Engel's law visualization)
+### How the app works (4 pages, left-hand menu)
 
-### 3. Conclusions
-Model performance summary (R², MAE, RMSE) + exportable HTML report.
+| Page | What you can do |
+|------|-----------------|
+| **1 · Introduction & data** | Read the project intro. Choose the **“Use the built-in sample”** (17,339 US households) **or** switch the radio to **“Upload your own files”** and drop your `fmli*.csv` files — the app re-trains the model on **your** data and every other page updates. |
+| **2 · Predict income & the rules** | Describe a household (age, gender, region, family, spending…) → predicted monthly income, “richer than X%”, your budget vs the **50/30/20** rule, and a live check of **Engel's law / 30% housing** rules. |
+| **3 · Education & income** | Seven tabs: predict income from an education level, income by education, the gender gap, feature importance, household clustering, spending profiles, and model accuracy. |
+| **4 · Key findings** | The honest summary of the results and caveats, plus a percentile tool. |
 
-## What the Notebook Covers
+**Loading your own data (optional).** On page 1, select “Upload your own files” in the radio,
+then drop all your `fmli*.csv` files into the upload box and wait ~1 minute while the app trains
+a new model on them.
 
-### Sprint 1 — Data Preparation (US-03 → US-07)
-- Load 5 quarters of fmli + memi data via interactive path input
-- Reconcile food variables (`FDHOMEPQ` → `GROCERPQ` transition in 2024Q2)
-- Clean, engineer features (budget shares, OECD scale, per-capita spending)
-- Encode categoricals, apply RobustScaler, run PCA
+---
 
-### Sprint 2 — Model Building (US-08 → US-12)
-- Compare 6 models (Linear, Ridge, Lasso, RF, GB, SVR)
-- Hyperparameter tuning via GridSearchCV
-- Stacking ensemble (R² = 0.987)
-- Residual diagnostics
+## 6. How the two parts connect
 
-### Sprint 3 — Education-Income Analysis (US-13 → US-17)
-- ANOVA + Tukey HSD for education groups
-- OLS regression with HC3 robust standard errors
-- Permutation importance (corrected, no target leakage)
-- 2D and full-feature clustering
-- MEMI member-level analysis (education info from member data)
-- Gender × education interaction, age cohorts, spending profiles
-- Synthesis and conclusions
+```
+CEX notebook  ──writes──►  output/features_v1.csv   ⇦ the Streamlit "built-in sample" data
+                          output/honest_gb.joblib   ⇦ the pre-trained model the app uses
+```
 
-## Output Files
+- The app **works immediately after setup** — no need to run the notebook first.
+- If the model file is missing, the app is smart: it trains the model itself the first time
+  (a spinner appears for ~2 minutes) using `features_v1.csv`.
 
-| File | Description |
-|------|-------------|
-| `output/features_v1.csv` | 62-column feature table (demographics + spending + encoded) |
-| `output/processed_data_v1.csv` | Scaled features + `FINCBTXM_M` target (for ML) |
-| `output/clean_data_v1.csv` | Cleaned raw data before feature engineering |
-| `output/final_model.joblib` | Serialized stacking ensemble + metadata |
+---
 
-These are generated by the notebook. The Streamlit app reads them directly.
+## 7. Troubleshooting
 
-## Notes
+| Problem | Fix |
+|---------|-----|
+| `'python' is not recognized as an internal or external command` | Python was not added to PATH. Re-run the Python installer, choose *Modify*, and tick **“Add python.exe to PATH”**. Or use `py` instead of `python` (`py -m pip install …`). |
+| `'pip' is not recognized` | Use the full command: `python -m pip install …`. |
+| `pip install` permission denied | `python -m pip install --user -r requirements.txt` |
+| VS Code does not list a Python kernel | Open the notebook, click the kernel name, **“Select Kernel” → “Python Environments”** and choose the interpreter. If none appears, restart VS Code. |
+| `streamlit: command not found` | Use `python -m streamlit run app/app.py` |
+| Port 8501 already in use | `python -m streamlit run app/app.py --server.port 8502` |
+| The app trains the model for the first time (~2 min) | Normal when `output/honest_gb.joblib` is absent — it means the model file did not arrive with the folder. It only happens once. |
+| “No files yet” / upload does nothing | On page 1 use the radio **“Upload your own files”** first, then the drop zone appears. |
+| First notebook run installs packages automatically | The notebook self-installs its own dependencies if missing — let it finish. |
+| `ModuleNotFoundError: statsmodels` / `seaborn` | Re-run `pip install -r requirements.txt` and restart the kernel. |
 
-- The notebook uses `input()` to get the dataset path — you must paste it when prompted.
-- `mtbi*.csv` (transaction-level expenditure data) is **not used** — it contains no education information.
-- The `housing_income_ratio` feature was removed to prevent target leakage.
-- `FDHOMEPQ` only exists in 2024Q1; from 2024Q2 onward, `GROCERPQ` is used instead.
-- `TFOODTOP`, `TFOODHOP`, `TFOODAWP` are near-zero noise and excluded.
-- All income values are converted to **monthly USD** (`annual / 12`).
+---
+
+## 8. Expected results (to check it worked)
+
+- **Notebook:** output files appear in `output/` (e.g. `features_v1.csv`, `honest_gb.joblib`),
+  and the final cell prints the conclusion of the education→income study.
+- **App:** page 2 predicts an income; page 3 shows income differences across education levels
+  (Bachelor ≈ **+$3,900 to +$4,600/month** over High School, statistically significant);
+  page 4 reports model accuracy **R² ≈ 0.72–0.77** for typical households.
+- **Engel's law:** food's share of the budget falls from ~**22%** (poorest quarter) to
+  ~**15%** (richest quarter).
